@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Inventory</title>
+    
+    <!-- Import Boxicons and Custom CSS -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles2.css">
+</head>
+<body>
+
+<div class="inventory-wrapper">
+    <!-- Hero Section -->
+    <header class="inventory-hero">
+        <h1>Discover Our Exclusive Vehicle Collection</h1>
+        <p>Browse through a wide range of high-quality vehicles tailored for every preference.</p>
+        <button onclick="location.href='contact.php'" class="cta-button">Contact Us for Inquiries</button>
+    </header>
+
+    <!-- Filter and Sort Section -->
+    <section class="filter-section">
+        <h2>Filter and Sort</h2>
+        <form id="filterForm">
+            <div class="filter-group">
+                <label for="make">Make:</label>
+                <input type="text" id="make" name="make" placeholder="e.g., Toyota">
+            </div>
+            <div class="filter-group">
+                <label for="model">Model:</label>
+                <input type="text" id="model" name="model" placeholder="e.g., Corolla">
+            </div>
+            <div class="filter-group">
+                <label for="year">Year:</label>
+                <input type="number" id="year" name="year" placeholder="e.g., 2020">
+            </div>
+            <div class="filter-group">
+                <label for="sort">Sort by:</label>
+                <select id="sort" name="sort">
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="priceLow">Price: Low to High</option>
+                    <option value="priceHigh">Price: High to Low</option>
+                </select>
+            </div>
+            <button type="button" class="filter-button" onclick="filterInventory()">Apply Filter</button>
+        </form>
+    </section>
+
+    <!-- Vehicle Listing Section -->
+    <section class="vehicle-listing">
+        <h2>Available Vehicles</h2>
+        <div id="vehicleCards" class="vehicle-cards">
+            <!-- Vehicle cards will be dynamically loaded here -->
+        </div>
+        <button id="loadMoreBtn" class="load-more" onclick="loadMore()">Load More</button>
+    </section>
+</div>
+
+<script>
+// Sample vehicle data (replace this with data from a database in a real application)
+const vehicles = [
+    { make: "Toyota", model: "Corolla", year: 2021, price: 20000, image: "car1.jpg" },
+    { make: "Honda", model: "Civic", year: 2020, price: 18000, image: "car2.jpg" },
+    { make: "Ford", model: "Mustang", year: 2019, price: 35000, image: "car3.jpg" },
+    { make: "Tesla", model: "Model 3", year: 2022, price: 40000, image: "car4.jpg" },
+    // Add more vehicle data here
+];
+
+let loadedItems = 0;
+const itemsPerLoad = 2;
+
+// Function to load vehicle cards
+function loadVehicles(start, end) {
+    const vehicleCards = document.getElementById("vehicleCards");
+    const slicedVehicles = vehicles.slice(start, end);
+
+    slicedVehicles.forEach(vehicle => {
+        const vehicleCard = document.createElement("div");
+        vehicleCard.classList.add("vehicle-card");
+        vehicleCard.innerHTML = `
+            <img src="${vehicle.image}" alt="${vehicle.make} ${vehicle.model}">
+            <h3>${vehicle.make} ${vehicle.model}</h3>
+            <p>Year: ${vehicle.year}</p>
+            <p>Price: $${vehicle.price}</p>
+            <button class="details-button">View Details</button>
+        `;
+        vehicleCards.appendChild(vehicleCard);
+    });
+
+    loadedItems += slicedVehicles.length;
+
+    // Hide "Load More" button if all items are loaded
+    if (loadedItems >= vehicles.length) {
+        document.getElementById("loadMoreBtn").style.display = "none";
+    }
+}
+
+// Initial load
+loadVehicles(0, itemsPerLoad);
+
+// Load more items
+function loadMore() {
+    loadVehicles(loadedItems, loadedItems + itemsPerLoad);
+}
+
+// Filter and sort function
+function filterInventory() {
+    const make = document.getElementById("make").value.toLowerCase();
+    const model = document.getElementById("model").value.toLowerCase();
+    const year = document.getElementById("year").value;
+    const sortOption = document.getElementById("sort").value;
+
+    let filteredVehicles = vehicles;
+
+    // Apply filters
+    if (make) filteredVehicles = filteredVehicles.filter(v => v.make.toLowerCase().includes(make));
+    if (model) filteredVehicles = filteredVehicles.filter(v => v.model.toLowerCase().includes(model));
+    if (year) filteredVehicles = filteredVehicles.filter(v => v.year == year);
+
+    // Apply sorting
+    if (sortOption === "newest") filteredVehicles.sort((a, b) => b.year - a.year);
+    if (sortOption === "oldest") filteredVehicles.sort((a, b) => a.year - b.year);
+    if (sortOption === "priceLow") filteredVehicles.sort((a, b) => a.price - b.price);
+    if (sortOption === "priceHigh") filteredVehicles.sort((a, b) => b.price - a.price);
+
+    // Update the display
+    document.getElementById("vehicleCards").innerHTML = "";
+    loadedItems = 0;
+    loadFilteredVehicles(filteredVehicles);
+}
+
+function loadFilteredVehicles(filteredVehicles) {
+    filteredVehicles.slice(0, itemsPerLoad).forEach(vehicle => {
+        const vehicleCard = document.createElement("div");
+        vehicleCard.classList.add("vehicle-card");
+        vehicleCard.innerHTML = `
+            <img src="${vehicle.image}" alt="${vehicle.make} ${vehicle.model}">
+            <h3>${vehicle.make} ${vehicle.model}</h3>
+            <p>Year: ${vehicle.year}</p>
+            <p>Price: $${vehicle.price}</p>
+            <button class="details-button">View Details</button>
+        `;
+        document.getElementById("vehicleCards").appendChild(vehicleCard);
+    });
+    loadedItems = itemsPerLoad;
+}
+
+</script>
+</body>
+</html>
